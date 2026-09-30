@@ -1,23 +1,10 @@
-<ShaderNodePreset SupportsAdaptiveDegradation="False" SupportsAction="False" SupportsTransition="False" SupportsTimeline="False" TimelineUseBack="False" MatteProvider="True" CommercialUsePermitted="True" ShaderType="Matchbox" SoftwareVersion="2016.0.0" LimitInputsToTexture="True" Version="1" Description="Block style drop shadow. Extrudes the matte along an angle to create a solid shadow, then comps the fill (colour or Front) over it. Outputs premultiplied RGB and the combined fill + shadow matte." Name="BlockShadow">
+<ShaderNodePreset SupportsAdaptiveDegradation="False" SupportsAction="False" SupportsTransition="False" SupportsTimeline="False" TimelineUseBack="False" MatteProvider="True" CommercialUsePermitted="True" ShaderType="Matchbox" SoftwareVersion="2016.0.0" LimitInputsToTexture="True" Version="1" Description="Block style drop shadow. Extrudes the matte along an angle to create a solid shadow, optionally softens it with a gaussian blur, then comps the fill (colour or Front) over it. Outputs premultiplied RGB and the combined fill + shadow matte." Name="BlockShadow">
+   <!-- Pass 1: premultiplied fill in RGB, matte in A -->
    <Shader OutputBitDepth="Output" Index="1">
       <Uniform Index="0" NoInput="Black" Tooltip="Front (RGB). Used as the fill when Use Front as Fill is on." DisplayName="Front" InputType="Front" Mipmaps="False" GL_TEXTURE_WRAP_T="GL_CLAMP_TO_EDGE" GL_TEXTURE_WRAP_S="GL_CLAMP_TO_EDGE" GL_TEXTURE_MAG_FILTER="GL_LINEAR" GL_TEXTURE_MIN_FILTER="GL_LINEAR" Type="sampler2D" Name="front">
       </Uniform>
       <Uniform Index="1" NoInput="Error" Tooltip="Matte (A). Defines the fill shape that casts the shadow." DisplayName="Matte" InputType="Matte" Mipmaps="False" GL_TEXTURE_WRAP_T="GL_CLAMP_TO_EDGE" GL_TEXTURE_WRAP_S="GL_CLAMP_TO_EDGE" GL_TEXTURE_MAG_FILTER="GL_LINEAR" GL_TEXTURE_MIN_FILTER="GL_LINEAR" Type="sampler2D" Name="matte">
       </Uniform>
-
-      <Uniform ResDependent="None" Max="360.0" Min="-360.0" Default="-45.0" Inc="1.0" Tooltip="Shadow direction in degrees. 0 = right, 90 = up, -45 = down-right." Row="0" Col="0" Page="0" Type="float" DisplayName="Angle" Name="angle">
-      </Uniform>
-      <Uniform ResDependent="None" Max="4000.0" Min="0.0" Default="20.0" Inc="1.0" Tooltip="Shadow extrusion length in pixels." Row="1" Col="0" Page="0" Type="float" DisplayName="Length" Name="shadowLength">
-      </Uniform>
-      <Uniform Row="2" Col="0" Page="0" Default="" Tooltip="Shadow colour." Type="vec3" ValueType="Colour" DisplayName="Shadow Colour" Name="shadowColor">
-         <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01">
-         </SubUniform>
-         <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01">
-         </SubUniform>
-         <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01">
-         </SubUniform>
-      </Uniform>
-
       <Uniform Row="0" Col="1" Page="0" Default="False" Tooltip="Use the Front input as the fill instead of Fill Colour." Type="bool" DisplayName="Use Front as Fill" Name="useFront">
       </Uniform>
       <Uniform Row="1" Col="1" Page="0" Default="False" Tooltip="Turn on if the Front is already premultiplied by the matte, so it isn't multiplied again. Only used with Use Front as Fill." Type="bool" DisplayName="Front Premultiplied" Name="frontPremultiplied">
@@ -31,6 +18,45 @@
          </SubUniform>
       </Uniform>
    </Shader>
+
+   <!-- Pass 2: extrude the matte into a hard block shadow -->
+   <Shader OutputBitDepth="Output" Index="2">
+      <Uniform Mipmaps="False" GL_TEXTURE_WRAP_T="GL_CLAMP_TO_EDGE" GL_TEXTURE_WRAP_S="GL_CLAMP_TO_EDGE" GL_TEXTURE_MAG_FILTER="GL_LINEAR" GL_TEXTURE_MIN_FILTER="GL_LINEAR" Type="sampler2D" Name="adsk_results_pass1">
+      </Uniform>
+      <Uniform ResDependent="None" Max="360.0" Min="-360.0" Default="-45.0" Inc="1.0" Tooltip="Shadow direction in degrees. 0 = right, 90 = up, -45 = down-right." Row="0" Col="0" Page="0" Type="float" DisplayName="Angle" Name="angle">
+      </Uniform>
+      <Uniform ResDependent="None" Max="4000.0" Min="0.0" Default="20.0" Inc="1.0" Tooltip="Shadow extrusion length in pixels." Row="1" Col="0" Page="0" Type="float" DisplayName="Length" Name="shadowLength">
+      </Uniform>
+   </Shader>
+
+   <!-- Pass 3: horizontal gaussian blur of the shadow -->
+   <Shader OutputBitDepth="Output" Index="3">
+      <Uniform Mipmaps="False" GL_TEXTURE_WRAP_T="GL_CLAMP_TO_EDGE" GL_TEXTURE_WRAP_S="GL_CLAMP_TO_EDGE" GL_TEXTURE_MAG_FILTER="GL_NEAREST" GL_TEXTURE_MIN_FILTER="GL_NEAREST" Type="sampler2D" Name="adsk_results_pass2">
+      </Uniform>
+      <Uniform ResDependent="None" Max="340.0" Min="0.0" Default="0.0" Inc="0.1" Tooltip="Gaussian blur of the shadow, in pixels (sigma). 0 = hard edges." Row="2" Col="0" Page="0" Type="float" DisplayName="Softness" Name="softness">
+      </Uniform>
+   </Shader>
+
+   <!-- Pass 4: vertical gaussian blur, then comp fill over shadow -->
+   <Shader OutputBitDepth="Output" Index="4">
+      <Uniform Mipmaps="False" GL_TEXTURE_WRAP_T="GL_CLAMP_TO_EDGE" GL_TEXTURE_WRAP_S="GL_CLAMP_TO_EDGE" GL_TEXTURE_MAG_FILTER="GL_NEAREST" GL_TEXTURE_MIN_FILTER="GL_NEAREST" Type="sampler2D" Name="adsk_results_pass1">
+      </Uniform>
+      <Uniform Mipmaps="False" GL_TEXTURE_WRAP_T="GL_CLAMP_TO_EDGE" GL_TEXTURE_WRAP_S="GL_CLAMP_TO_EDGE" GL_TEXTURE_MAG_FILTER="GL_NEAREST" GL_TEXTURE_MIN_FILTER="GL_NEAREST" Type="sampler2D" Name="adsk_results_pass3">
+      </Uniform>
+      <Uniform Type="float" Name="softness">
+         <Duplicate>
+         </Duplicate>
+      </Uniform>
+      <Uniform Row="3" Col="0" Page="0" Default="" Tooltip="Shadow colour." Type="vec3" ValueType="Colour" DisplayName="Shadow Colour" Name="shadowColor">
+         <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01">
+         </SubUniform>
+         <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01">
+         </SubUniform>
+         <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01">
+         </SubUniform>
+      </Uniform>
+   </Shader>
+
    <Page Name="Block Shadow" Page="0">
       <Col Name="Shadow" Col="0" Page="0">
       </Col>
