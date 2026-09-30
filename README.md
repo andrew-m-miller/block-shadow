@@ -4,6 +4,11 @@ A Matchbox shader for Autodesk Flame that builds a solid, block style drop
 shadow from a matte. The matte is extruded along an angle, then the fill
 (a flat colour or the Front input) is comped over it.
 
+![BlockShadow output: a fill colour with a dark shadow down-right, and the Front input as fill with a yellow shadow down-left](docs/preview.png)
+
+*Top: Fill Colour, Angle -45, Length 16. Bottom: Use Front as Fill, Angle
+-135, Length 30. Shown comped over a background.*
+
 ## Files
 
 | File | Purpose |
