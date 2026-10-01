@@ -9,6 +9,7 @@ uniform float adsk_result_w, adsk_result_h;
 
 uniform float softness;  // gaussian sigma in pixels
 uniform vec3 shadowColor;
+uniform float shadowOpacity;  // 0 = invisible, 1 = solid
 
 // Upper bound on kernel half-width in pixels.
 const int MAX_RADIUS = 1024;
@@ -38,7 +39,7 @@ void main(void)
 		}
 		shadowA /= total;
 	}
-	shadowA = clamp(shadowA, 0.0, 1.0);
+	shadowA = clamp(shadowA, 0.0, 1.0) * clamp(shadowOpacity, 0.0, 1.0);
 
 	vec4 fill = texture2D(adsk_results_pass1, uv);
 	float fillA = fill.a;

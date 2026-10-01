@@ -53,6 +53,8 @@ timeline where Matchbox effects are supported.
 - **Softness:** gaussian blur on the shadow, in pixels (sigma). 0 keeps the
   edges hard.
 - **Shadow Colour:** the shadow's colour.
+- **Shadow Opacity:** how see-through the shadow is. 1 is solid, 0 is
+  invisible. It affects both the RGB and the output matte.
 
 **Fill**
 

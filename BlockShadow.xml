@@ -55,6 +55,8 @@
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01">
          </SubUniform>
       </Uniform>
+      <Uniform ResDependent="None" Max="1.0" Min="0.0" Default="1.0" Inc="0.01" Tooltip="Shadow opacity. 1 = solid, 0 = invisible. Affects both the RGB and the output matte." Row="4" Col="0" Page="0" Type="float" DisplayName="Shadow Opacity" Name="shadowOpacity">
+      </Uniform>
    </Shader>
 
    <Page Name="Block Shadow" Page="0">
