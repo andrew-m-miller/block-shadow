@@ -55,6 +55,9 @@ timeline where Matchbox effects are supported.
 - **Shadow Colour:** the shadow's colour.
 - **Shadow Opacity:** how see-through the shadow is. 1 is solid, 0 is
   invisible. It affects both the RGB and the output matte.
+- **Shadow Only:** output just the shadow, without the fill. The shadow isn't
+  cut out where the fill sits, so comping the fill back over it gives the
+  same result as the normal output.
 
 **Fill**
 
@@ -68,6 +71,9 @@ timeline where Matchbox effects are supported.
 
 - **RGB:** the fill comped over the shadow, premultiplied.
 - **Alpha / Matte:** the fill and shadow mattes combined.
+
+With **Shadow Only** on, RGB is the premultiplied shadow and the matte is
+the shadow's matte alone.
 
 ## Notes
 

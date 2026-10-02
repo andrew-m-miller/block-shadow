@@ -10,6 +10,7 @@ uniform float adsk_result_w, adsk_result_h;
 uniform float softness;  // gaussian sigma in pixels
 uniform vec3 shadowColor;
 uniform float shadowOpacity;  // 0 = invisible, 1 = solid
+uniform bool shadowOnly;
 
 // Upper bound on kernel half-width in pixels.
 const int MAX_RADIUS = 1024;
@@ -40,6 +41,13 @@ void main(void)
 		shadowA /= total;
 	}
 	shadowA = clamp(shadowA, 0.0, 1.0) * clamp(shadowOpacity, 0.0, 1.0);
+
+	// Output just the shadow, without holding it out by the fill, so the fill
+	// can be comped back over it later.
+	if (shadowOnly) {
+		gl_FragColor = vec4(shadowColor * shadowA, shadowA);
+		return;
+	}
 
 	vec4 fill = texture2D(adsk_results_pass1, uv);
 	float fillA = fill.a;
