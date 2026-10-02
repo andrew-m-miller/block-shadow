@@ -1,4 +1,4 @@
-<ShaderNodePreset SupportsAdaptiveDegradation="False" SupportsAction="False" SupportsTransition="False" SupportsTimeline="False" TimelineUseBack="False" MatteProvider="True" CommercialUsePermitted="True" ShaderType="Matchbox" SoftwareVersion="2016.0.0" LimitInputsToTexture="True" Version="1" Description="Block style drop shadow. Extrudes the matte along an angle to create a solid shadow, optionally softens it with a gaussian blur, then comps the fill (colour or Front) over it. Outputs premultiplied RGB and the combined fill + shadow matte." Name="BlockShadow">
+<ShaderNodePreset SupportsAdaptiveDegradation="False" SupportsAction="False" SupportsTransition="False" SupportsTimeline="False" TimelineUseBack="False" MatteProvider="True" CommercialUsePermitted="True" ShaderType="Matchbox" SoftwareVersion="2016.0.0" LimitInputsToTexture="True" Version="1" Description="Block style drop shadow. Extrudes the matte along an angle to create a solid shadow, optionally softens it with a gaussian blur, then comps the fill (colour or Front) over it. The shadow can be coloured with a flat colour or the optional Shadow Fill input. Outputs premultiplied RGB and the combined fill + shadow matte." Name="BlockShadow">
    <!-- Pass 1: premultiplied fill in RGB, matte in A -->
    <Shader OutputBitDepth="Output" Index="1">
       <Uniform Index="0" NoInput="Black" Tooltip="Front (RGB). Used as the fill when Use Front as Fill is on." DisplayName="Front" InputType="Front" Mipmaps="False" GL_TEXTURE_WRAP_T="GL_CLAMP_TO_EDGE" GL_TEXTURE_WRAP_S="GL_CLAMP_TO_EDGE" GL_TEXTURE_MAG_FILTER="GL_LINEAR" GL_TEXTURE_MIN_FILTER="GL_LINEAR" Type="sampler2D" Name="front">
@@ -43,11 +43,15 @@
       </Uniform>
       <Uniform Mipmaps="False" GL_TEXTURE_WRAP_T="GL_CLAMP_TO_EDGE" GL_TEXTURE_WRAP_S="GL_CLAMP_TO_EDGE" GL_TEXTURE_MAG_FILTER="GL_NEAREST" GL_TEXTURE_MIN_FILTER="GL_NEAREST" Type="sampler2D" Name="adsk_results_pass3">
       </Uniform>
+      <Uniform Index="2" NoInput="White" Tooltip="Shadow Fill (RGB), optional. A gradient or texture used to colour the shadow when Use Shadow Fill Input is on." DisplayName="Shadow Fill" InputType="Back" Mipmaps="False" GL_TEXTURE_WRAP_T="GL_CLAMP_TO_EDGE" GL_TEXTURE_WRAP_S="GL_CLAMP_TO_EDGE" GL_TEXTURE_MAG_FILTER="GL_LINEAR" GL_TEXTURE_MIN_FILTER="GL_LINEAR" Type="sampler2D" Name="shadowFill">
+      </Uniform>
       <Uniform Type="float" Name="softness">
          <Duplicate>
          </Duplicate>
       </Uniform>
-      <Uniform Row="3" Col="0" Page="0" Default="" Tooltip="Shadow colour." Type="vec3" ValueType="Colour" DisplayName="Shadow Colour" Name="shadowColor">
+      <Uniform Row="0" Col="2" Page="0" Default="False" Tooltip="Colour the shadow with the Shadow Fill input instead of Shadow Colour." Type="bool" DisplayName="Use Shadow Fill Input" Name="useShadowFill">
+      </Uniform>
+      <Uniform Row="1" Col="2" Page="0" Default="" Tooltip="Shadow colour (ignored when Use Shadow Fill Input is on)." Type="vec3" ValueType="Colour" DisplayName="Shadow Colour" Name="shadowColor">
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01">
          </SubUniform>
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01">
@@ -55,9 +59,9 @@
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01">
          </SubUniform>
       </Uniform>
-      <Uniform ResDependent="None" Max="1.0" Min="0.0" Default="1.0" Inc="0.01" Tooltip="Shadow opacity. 1 = solid, 0 = invisible. Affects both the RGB and the output matte." Row="4" Col="0" Page="0" Type="float" DisplayName="Shadow Opacity" Name="shadowOpacity">
+      <Uniform ResDependent="None" Max="1.0" Min="0.0" Default="1.0" Inc="0.01" Tooltip="Shadow opacity. 1 = solid, 0 = invisible. Affects both the RGB and the output matte." Row="3" Col="0" Page="0" Type="float" DisplayName="Shadow Opacity" Name="shadowOpacity">
       </Uniform>
-      <Uniform Row="5" Col="0" Page="0" Default="False" Tooltip="Output only the shadow (premultiplied RGB and its matte), without the fill." Type="bool" DisplayName="Shadow Only" Name="shadowOnly">
+      <Uniform Row="4" Col="0" Page="0" Default="False" Tooltip="Output only the shadow (premultiplied RGB and its matte), without the fill." Type="bool" DisplayName="Shadow Only" Name="shadowOnly">
       </Uniform>
    </Shader>
 
@@ -65,6 +69,8 @@
       <Col Name="Shadow" Col="0" Page="0">
       </Col>
       <Col Name="Fill" Col="1" Page="0">
+      </Col>
+      <Col Name="Shadow Fill" Col="2" Page="0">
       </Col>
    </Page>
 </ShaderNodePreset>

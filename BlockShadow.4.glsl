@@ -5,10 +5,12 @@
 
 uniform sampler2D adsk_results_pass1;  // rgb = premultiplied fill, a = fill matte
 uniform sampler2D adsk_results_pass3;  // horizontally blurred shadow matte
+uniform sampler2D shadowFill;          // optional gradient/texture for the shadow
 uniform float adsk_result_w, adsk_result_h;
 
 uniform float softness;  // gaussian sigma in pixels
 uniform vec3 shadowColor;
+uniform bool useShadowFill;
 uniform float shadowOpacity;  // 0 = invisible, 1 = solid
 uniform bool shadowOnly;
 
@@ -42,17 +44,19 @@ void main(void)
 	}
 	shadowA = clamp(shadowA, 0.0, 1.0) * clamp(shadowOpacity, 0.0, 1.0);
 
+	vec3 shadowRGB = useShadowFill ? texture2D(shadowFill, uv).rgb : shadowColor;
+
 	// Output just the shadow, without holding it out by the fill, so the fill
 	// can be comped back over it later.
 	if (shadowOnly) {
-		gl_FragColor = vec4(shadowColor * shadowA, shadowA);
+		gl_FragColor = vec4(shadowRGB * shadowA, shadowA);
 		return;
 	}
 
 	vec4 fill = texture2D(adsk_results_pass1, uv);
 	float fillA = fill.a;
 
-	vec3 rgb = fill.rgb + shadowColor * shadowA * (1.0 - fillA);
+	vec3 rgb = fill.rgb + shadowRGB * shadowA * (1.0 - fillA);
 	float alpha = fillA + shadowA * (1.0 - fillA);
 
 	gl_FragColor = vec4(rgb, alpha);

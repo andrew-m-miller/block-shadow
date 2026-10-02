@@ -32,8 +32,8 @@ numbered passes in order and reads the `.xml` to build the node's UI.
    project, but any folder Flame can browse to works.
 2. In Batch, add a **Matchbox** node. In the file browser that opens, go to
    that folder and pick `BlockShadow.1.glsl`.
-3. Connect your Front (RGB) and Matte (A), then use the node's Result and
-   Matte outputs.
+3. Connect your Front (RGB) and Matte (A), and optionally a Shadow Fill,
+   then use the node's Result and Matte outputs.
 
 You can also load it the same way from a Matchbox in Action or on the
 timeline where Matchbox effects are supported.
@@ -42,6 +42,8 @@ timeline where Matchbox effects are supported.
 
 - **Front:** RGB. Only used when **Use Front as Fill** is on.
 - **Matte:** the shape that casts the shadow. Required.
+- **Shadow Fill:** RGB, optional. A gradient, texture or any other image to
+  colour the shadow with. Only used when **Use Shadow Fill Input** is on.
 
 ## Controls
 
@@ -52,7 +54,6 @@ timeline where Matchbox effects are supported.
 - **Length:** how far the shadow extrudes, in pixels.
 - **Softness:** gaussian blur on the shadow, in pixels (sigma). 0 keeps the
   edges hard.
-- **Shadow Colour:** the shadow's colour.
 - **Shadow Opacity:** how see-through the shadow is. 1 is solid, 0 is
   invisible. It affects both the RGB and the output matte.
 - **Shadow Only:** output just the shadow, without the fill. The shadow isn't
@@ -66,6 +67,14 @@ timeline where Matchbox effects are supported.
   the matte, so it isn't multiplied again. Only applies with Use Front as
   Fill.
 - **Fill Colour:** the fill's colour when not using the Front.
+
+**Shadow Fill**
+
+- **Use Shadow Fill Input:** colour the shadow with the Shadow Fill input
+  instead of Shadow Colour. The input is lined up with the frame, not
+  extruded with the shadow, so a gradient stays put as the shadow moves.
+- **Shadow Colour:** the shadow's colour when not using the Shadow Fill
+  input.
 
 ## Outputs
 
