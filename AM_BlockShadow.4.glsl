@@ -1,63 +1,102 @@
 #version 120
 
-// BlockShadow pass 4: vertical gaussian blur of the shadow matte, then comp
-// the fill over the shadow.
+// BlockShadow pass 4: extrude the matte into a hard block shadow, then cut the
+// Gap out around the fill.
+//
+// Output R : shadow matte
+// Output G : shadow matte * how far along the extrusion this pixel is
+//            (0 = near the fill, 1 = far end), premultiplied so it blurs cleanly
+//
+// Distances are measured in display pixels (pixel aspect ratio applied), so the
+// shadow keeps its angle on non-square pixel formats.
 
-uniform sampler2D adsk_results_pass1;  // rgb = premultiplied fill, a = fill matte
-uniform sampler2D adsk_results_pass3;  // horizontally blurred shadow matte
-uniform sampler2D shadowFill;          // optional gradient/texture for the shadow
-uniform float adsk_result_w, adsk_result_h;
+uniform sampler2D adsk_results_pass1;  // a = fill matte
+uniform sampler2D adsk_results_pass3;  // r = distance to the fill
+uniform float adsk_result_w, adsk_result_h, adsk_result_pixelratio;
 
-uniform float softness;  // gaussian sigma in pixels
-uniform vec3 shadowColor;
-uniform bool useShadowFill;
-uniform float shadowOpacity;  // 0 = invisible, 1 = solid
-uniform bool shadowOnly;
+uniform float angle;             // degrees, 0 = right, counter-clockwise
+uniform float shadowLength;      // pixels
+uniform float shadowGap;         // pixels between the fill and the shadow
+uniform bool perspective;
+uniform vec2 vanishingPoint;     // 0-1 frame coordinates
+uniform float perspectiveDepth;  // 0-1, fraction of the way to the vanishing point
 
-// Upper bound on kernel half-width in pixels.
-const int MAX_RADIUS = 1024;
+// Upper bound on extrusion samples (one per pixel of length).
+const int MAX_STEPS = 4096;
+
+vec2 res;
+
+float sampleMatte(vec2 px)
+{
+	// Treat anything outside the frame as empty so edges don't smear inward.
+	vec2 uv = px / res;
+	if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0)
+		return 0.0;
+	return texture2D(adsk_results_pass1, uv).a;
+}
 
 void main(void)
 {
-	vec2 res = vec2(adsk_result_w, adsk_result_h);
-	vec2 uv = gl_FragCoord.xy / res;
+	res = vec2(adsk_result_w, adsk_result_h);
+	float ratio = adsk_result_pixelratio > 0.0 ? adsk_result_pixelratio : 1.0;
+	vec2 px = gl_FragCoord.xy;
+	float gap = max(shadowGap, 0.0);
 
-	float sigma = max(softness, 0.0);
-	float shadowA = texture2D(adsk_results_pass3, uv).r;
+	// March from this pixel towards the shape that casts onto it, in display
+	// pixels: dir is the march direction and t runs from 1 to tEnd.
+	vec2 dir;
+	float tEnd;
+	float distToVP = 0.0;
+	float depth = clamp(perspectiveDepth, 0.0, 0.99);
 
-	if (sigma >= 0.01) {
-		int radius = int(ceil(sigma * 3.0));
-		float k = -0.5 / (sigma * sigma);
-		vec2 texel = vec2(0.0, 1.0 / res.y);
-
-		float total = 1.0;
-		for (int i = 1; i < MAX_RADIUS; i++) {
-			if (i > radius)
-				break;
-			float y = float(i);
-			float w = exp(y * y * k);
-			shadowA += w * (texture2D(adsk_results_pass3, uv + texel * y).r
-			              + texture2D(adsk_results_pass3, uv - texel * y).r);
-			total += 2.0 * w;
+	if (perspective) {
+		vec2 vp = vanishingPoint * res;
+		vec2 away = vec2((px.x - vp.x) * ratio, px.y - vp.y);
+		distToVP = length(away);
+		if (distToVP < 0.5 || depth <= 0.0) {
+			gl_FragColor = vec4(0.0);
+			return;
 		}
-		shadowA /= total;
+		// Shapes extrude towards the vanishing point, so the caster lies further
+		// away from it. A point at distance R reaches R * (1 - depth), so this
+		// pixel can be covered by points out to distToVP / (1 - depth).
+		dir = away / distToVP;
+		tEnd = distToVP * depth / (1.0 - depth);
+	} else {
+		float rad = radians(angle);
+		dir = -vec2(cos(rad), sin(rad));
+		// Extend by the gap so the visible shadow is still Length long.
+		tEnd = max(shadowLength, 0.0) + gap;
 	}
-	shadowA = clamp(shadowA, 0.0, 1.0) * clamp(shadowOpacity, 0.0, 1.0);
 
-	vec3 shadowRGB = useShadowFill ? texture2D(shadowFill, uv).rgb : shadowColor;
+	int steps = int(ceil(tEnd));
+	vec2 stepPx = vec2(dir.x / ratio, dir.y);
 
-	// Output just the shadow, without holding it out by the fill, so the fill
-	// can be comped back over it later.
-	if (shadowOnly) {
-		gl_FragColor = vec4(shadowRGB * shadowA, shadowA);
-		return;
+	float shadowA = 0.0;
+	float hitU = 0.0;
+	// Start one pixel out, never at this pixel itself, so the shadow sits
+	// behind the fill without fringing its edges.
+	for (int i = 1; i < MAX_STEPS; i++) {
+		if (i > steps || shadowA >= 1.0)
+			break;
+		float t = min(float(i), tEnd);
+
+		float m = sampleMatte(px + stepPx * t);
+		if (m > shadowA) {
+			shadowA = m;
+			// Position along the extrusion of the nearest caster, 0-1.
+			if (perspective)
+				hitU = (t / (distToVP + t)) / depth;
+			else
+				hitU = shadowLength > 0.0 ? (t - gap) / shadowLength : 0.0;
+		}
 	}
 
-	vec4 fill = texture2D(adsk_results_pass1, uv);
-	float fillA = fill.a;
+	// Cut the shadow back to Gap pixels away from the fill.
+	if (gap > 0.0) {
+		float d = texture2D(adsk_results_pass3, px / res).r;
+		shadowA *= 1.0 - clamp(gap + 0.5 - d, 0.0, 1.0);
+	}
 
-	vec3 rgb = fill.rgb + shadowRGB * shadowA * (1.0 - fillA);
-	float alpha = fillA + shadowA * (1.0 - fillA);
-
-	gl_FragColor = vec4(rgb, alpha);
+	gl_FragColor = vec4(shadowA, shadowA * clamp(hitU, 0.0, 1.0), 0.0, shadowA);
 }

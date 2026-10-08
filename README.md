@@ -1,36 +1,42 @@
 # BlockShadow
 
 A Matchbox shader for Autodesk Flame that builds a solid, block style drop
-shadow from a matte. The matte is extruded along an angle, optionally
-softened with a gaussian blur, then the fill (a flat colour or the Front
-input) is comped over it.
+shadow from a matte. The matte is extruded along an angle, or towards a
+vanishing point, and the shadow can be set back from the fill, shaded along
+its length, softened with a gaussian blur and outlined. The fill (the Front
+input or a flat colour) is comped over it.
 
-![BlockShadow output in five rows: a hard dark shadow, the Front as the fill with a yellow shadow, a long soft shadow, a striped gradient shadow from the Shadow Fill input, and a half-transparent shadow over red](docs/preview.png)
+![BlockShadow output in six rows: outlined letters with a black block shadow, the Front as the fill with a yellow shadow, a shadow shaded from red to dark and fading out, a perspective extrusion towards a point above the frame, a long soft shadow, and a striped gradient shadow from the Shadow Fill input](docs/preview.png)
 
-*From top: Fill Colour with a hard shadow (Angle -45, Length 16). The Front
-as the fill (Angle -135, Length 30). A soft shadow (Angle -60, Length 60,
-Softness 8). A striped gradient from the Shadow Fill input (Angle -50,
-Length 40). Shadow Opacity 0.5 (Angle -45, Length 24). Shown comped over
-a background.*
+*From top: Outline set to Both, width 4 (Angle -45, Length 22). The Front
+as the fill (Angle -135, Length 30). Shade Extrusion from red to dark with
+Far Opacity 0.2 (Angle -60, Length 70). Perspective towards a point above
+the frame, Depth 0.3, shaded. A soft shadow (Angle -60, Length 60, Softness
+8). A striped gradient from the Shadow Fill input (Angle -50, Length 40).
+Shown comped over a background.*
 
 ## Files
 
 | File | Purpose |
 | --- | --- |
 | `AM_BlockShadow.1.glsl` | Pass 1: builds the fill and carries the matte |
-| `AM_BlockShadow.2.glsl` | Pass 2: extrudes the matte into the block shadow |
-| `AM_BlockShadow.3.glsl` | Pass 3: blurs the shadow horizontally |
-| `AM_BlockShadow.4.glsl` | Pass 4: blurs the shadow vertically and comps the fill over it |
+| `AM_BlockShadow.2.glsl` | Pass 2: distance to the fill, horizontal |
+| `AM_BlockShadow.3.glsl` | Pass 3: distance to the fill, vertical |
+| `AM_BlockShadow.4.glsl` | Pass 4: extrudes the matte into the block shadow and cuts out the Gap |
+| `AM_BlockShadow.5.glsl` | Pass 5: distance to the silhouette (fill and shadow), horizontal |
+| `AM_BlockShadow.6.glsl` | Pass 6: distance to the silhouette, vertical |
+| `AM_BlockShadow.7.glsl` | Pass 7: blurs the shadow horizontally |
+| `AM_BlockShadow.8.glsl` | Pass 8: blurs the shadow vertically and comps everything |
 | `AM_BlockShadow.xml` | UI definition: inputs, controls, layout |
 
-Keep all five files together and keep the names as they are. Flame runs the
+Keep all nine files together and keep the names as they are. Flame runs the
 numbered passes in order and reads the `.xml` to build the node's UI.
 
 ## Install
 
-1. Copy all four `AM_BlockShadow.*.glsl` files and `AM_BlockShadow.xml` into the
-   same folder on your Flame workstation. A shared location such as
-   `/opt/Autodesk/shared/matchbox/shaders/` makes it available to every
+1. Copy all eight `AM_BlockShadow.*.glsl` files and `AM_BlockShadow.xml`
+   into the same folder on your Flame workstation. A shared location such
+   as `/opt/Autodesk/shared/matchbox/shaders/` makes it available to every
    project, but any folder Flame can browse to works.
 2. In Batch, add a **Matchbox** node. In the file browser that opens, go to
    that folder and pick `AM_BlockShadow.1.glsl`.
@@ -53,18 +59,22 @@ timeline where Matchbox effects are supported.
 
 ## Controls
 
+The controls are on two pages.
+
+### Block Shadow page
+
 **Shadow**
 
 - **Angle:** shadow direction in degrees. 0 is right, 90 is up, and the
-  default of -45 is down-right.
-- **Length:** how far the shadow extrudes, in pixels.
+  default of -45 is down-right. Hidden when Perspective is on.
+- **Length:** how far the shadow extrudes, in pixels. Hidden when
+  Perspective is on.
+- **Gap:** space between the fill and the shadow, in pixels. The shadow is
+  lengthened by the same amount, so the visible part stays Length long.
 - **Softness:** gaussian blur on the shadow, in pixels (sigma). 0 keeps the
   edges hard.
 - **Shadow Opacity:** how see-through the shadow is. 1 is solid, 0 is
   invisible. It affects both the RGB and the output matte.
-- **Shadow Only:** output just the shadow, without the fill. The shadow isn't
-  cut out where the fill sits, so comping the fill back over it gives the
-  same result as the normal output.
 
 **Fill**
 
@@ -82,20 +92,66 @@ timeline where Matchbox effects are supported.
   extruded with the shadow, so a gradient stays put as the shadow moves.
 - **Shadow Colour:** the shadow's colour. Only shown when Use Shadow Fill
   Input is off.
+- **Shade Extrusion:** shade the shadow along its length, from its colour
+  next to the fill to Far Colour and Far Opacity at the far end. This makes
+  it read as a 3D block rather than a flat cast shadow.
+- **Far Colour:** colour at the far end of the shadow. Only shown when
+  Shade Extrusion is on.
+- **Far Opacity:** opacity at the far end. Lower it to fade the shadow out
+  with distance. Only shown when Shade Extrusion is on.
+
+**Output**
+
+- **Shadow Only:** output just the shadow and its Silhouette outline,
+  without the fill or the Fill outline. The shadow isn't cut out where the
+  fill sits (beyond any Gap), so comping the fill back over it gives the
+  same result as the normal output.
+
+### Outline / Perspective page
+
+**Outline**
+
+- **Outline:** which outline to draw.
+  - **Off:** no outline.
+  - **Fill:** around the fill, including where it sits over the shadow.
+  - **Silhouette:** around the outside of the fill and shadow together.
+  - **Both:** both outlines, the look in the top row of the preview.
+- **Outline Width:** in pixels. Hidden when Outline is Off.
+- **Outline Colour:** hidden when Outline is Off.
+
+**Perspective**
+
+- **Perspective:** extrude towards a vanishing point instead of along a
+  fixed angle. Angle and Length are hidden while it's on.
+- **Vanishing Point:** the point the shadow recedes towards, in frame
+  coordinates (0 to 1, with 0.5, 0.5 the centre). It can sit outside the
+  frame.
+- **Depth:** how far the shadow reaches towards the vanishing point. 0 is
+  none and 0.5 is halfway.
 
 ## Outputs
 
-- **RGB:** the fill comped over the shadow, premultiplied.
-- **Alpha / Matte:** the fill and shadow mattes combined.
+- **RGB:** everything comped together, premultiplied. Back to front: the
+  Silhouette outline, the shadow, the Fill outline, then the fill.
+- **Alpha / Matte:** the combined matte of all of those.
 
-With **Shadow Only** on, RGB is the premultiplied shadow and the matte is
-the shadow's matte alone.
+With **Shadow Only** on, RGB is the premultiplied shadow and its Silhouette
+outline, and the matte is theirs alone.
 
 ## Notes
 
-- The shadow takes one sample per pixel of Length, capped at 4096, so very
-  long shadows cost more to render.
-- Each blur pass takes about 6 × Softness samples per pixel. Softness is
-  capped at 340, and large values are slower too.
-- Anything outside the frame is treated as empty, so mattes touching the
-  frame edge don't smear into the shadow.
+- **Resolution:** Length, Gap, Softness and Outline Width scale with the
+  frame height, so a setup keeps its look when the resolution changes.
+- **Non-square pixels:** angles and distances account for the clip's pixel
+  aspect ratio, so the shadow keeps its angle on anamorphic formats.
+- **Outlines and softness:** outlines follow the hard edges of the fill and
+  shadow, so they stay crisp when Softness is up.
+- **Outlines and opacity:** outlines don't fade with Shadow Opacity. Set
+  Shadow Opacity to 0 with a Silhouette outline for a hollow, outline-only
+  shadow.
+- **Render cost:** the shadow takes one sample per pixel of Length, capped
+  at 4096. Each blur pass takes about 6 × Softness samples per pixel, with
+  Softness capped at 340. The outline and Gap passes take about twice their
+  width in samples. Large values of any of these are slower.
+- **Frame edges:** anything outside the frame is treated as empty, so
+  mattes touching the frame edge don't smear into the shadow.
