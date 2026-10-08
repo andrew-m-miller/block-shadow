@@ -1,15 +1,15 @@
 <ShaderNodePreset SupportsAdaptiveDegradation="False" SupportsAction="False" SupportsTransition="False" SupportsTimeline="False" TimelineUseBack="False" MatteProvider="True" CommercialUsePermitted="True" ShaderType="Matchbox" SoftwareVersion="2016.0.0" LimitInputsToTexture="True" Version="1" Description="Block style drop shadow. Extrudes the matte along an angle to create a solid shadow, optionally softens it with a gaussian blur, then comps the fill (colour or Front) over it. The shadow can be coloured with a flat colour or the optional Shadow Fill input. Outputs premultiplied RGB and the combined fill + shadow matte." Name="BlockShadow">
    <!-- Pass 1: premultiplied fill in RGB, matte in A -->
    <Shader OutputBitDepth="Output" Index="1">
-      <Uniform Index="0" NoInput="Black" Tooltip="Front (RGB). Used as the fill when Use Front as Fill is on." DisplayName="Front" InputType="Front" Mipmaps="False" GL_TEXTURE_WRAP_T="GL_CLAMP_TO_EDGE" GL_TEXTURE_WRAP_S="GL_CLAMP_TO_EDGE" GL_TEXTURE_MAG_FILTER="GL_LINEAR" GL_TEXTURE_MIN_FILTER="GL_LINEAR" Type="sampler2D" Name="front">
+      <Uniform Index="0" NoInput="Error" Tooltip="Front (RGB). Required: the output takes its resolution and colour space from this input. Used as the fill unless Use Fill Colour is on." DisplayName="Front" InputType="Front" Mipmaps="False" GL_TEXTURE_WRAP_T="GL_CLAMP_TO_EDGE" GL_TEXTURE_WRAP_S="GL_CLAMP_TO_EDGE" GL_TEXTURE_MAG_FILTER="GL_LINEAR" GL_TEXTURE_MIN_FILTER="GL_LINEAR" Type="sampler2D" Name="front">
       </Uniform>
       <Uniform Index="1" NoInput="Error" Tooltip="Matte (A). Defines the fill shape that casts the shadow." DisplayName="Matte" InputType="Matte" Mipmaps="False" GL_TEXTURE_WRAP_T="GL_CLAMP_TO_EDGE" GL_TEXTURE_WRAP_S="GL_CLAMP_TO_EDGE" GL_TEXTURE_MAG_FILTER="GL_LINEAR" GL_TEXTURE_MIN_FILTER="GL_LINEAR" Type="sampler2D" Name="matte">
       </Uniform>
-      <Uniform Row="0" Col="1" Page="0" Default="False" Tooltip="Use the Front input as the fill instead of Fill Colour." Type="bool" DisplayName="Use Front as Fill" Name="useFront">
+      <Uniform Row="0" Col="1" Page="0" Default="False" Tooltip="Fill with Fill Colour instead of the Front input." Type="bool" DisplayName="Use Fill Colour" Name="useFillColor">
       </Uniform>
-      <Uniform Row="1" Col="1" Page="0" Default="False" Tooltip="Turn on if the Front is already premultiplied by the matte, so it isn't multiplied again. Only used with Use Front as Fill." Type="bool" DisplayName="Front Premultiplied" Name="frontPremultiplied">
+      <Uniform Row="2" Col="1" Page="0" Default="False" Tooltip="Turn on if the Front is already premultiplied by the matte, so it isn't multiplied again." UIConditionSource="useFillColor" UIConditionValue="True" UIConditionInvert="True" UIConditionType="Hide" Type="bool" DisplayName="Front Premultiplied" Name="frontPremultiplied">
       </Uniform>
-      <Uniform Row="2" Col="1" Page="0" Default="" Tooltip="Fill colour (ignored when Use Front as Fill is on)." Type="vec3" ValueType="Colour" DisplayName="Fill Colour" Name="fillColor">
+      <Uniform Row="1" Col="1" Page="0" Default="" Tooltip="Fill colour." UIConditionSource="useFillColor" UIConditionValue="True" UIConditionType="Hide" Type="vec3" ValueType="Colour" DisplayName="Fill Colour" Name="fillColor">
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.01">
          </SubUniform>
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.01">
@@ -51,7 +51,7 @@
       </Uniform>
       <Uniform Row="0" Col="2" Page="0" Default="False" Tooltip="Colour the shadow with the Shadow Fill input instead of Shadow Colour." Type="bool" DisplayName="Use Shadow Fill Input" Name="useShadowFill">
       </Uniform>
-      <Uniform Row="1" Col="2" Page="0" Default="" Tooltip="Shadow colour (ignored when Use Shadow Fill Input is on)." Type="vec3" ValueType="Colour" DisplayName="Shadow Colour" Name="shadowColor">
+      <Uniform Row="1" Col="2" Page="0" Default="" Tooltip="Shadow colour." UIConditionSource="useShadowFill" UIConditionValue="True" UIConditionInvert="True" UIConditionType="Hide" Type="vec3" ValueType="Colour" DisplayName="Shadow Colour" Name="shadowColor">
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01">
          </SubUniform>
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01">

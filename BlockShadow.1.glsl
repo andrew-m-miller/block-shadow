@@ -8,14 +8,14 @@
 // Output Alpha : combined fill + shadow matte
 //
 // Pass 1: build the premultiplied fill and carry the matte in alpha.
-// Each input can only be read in one pass, so later passes use this result.
+// Later passes read the fill and matte from this result.
 
 uniform sampler2D front;
 uniform sampler2D matte;
 uniform float adsk_result_w, adsk_result_h;
 
 uniform vec3 fillColor;
-uniform bool useFront;
+uniform bool useFillColor;
 uniform bool frontPremultiplied;
 
 void main(void)
@@ -26,10 +26,12 @@ void main(void)
 
 	// A premultiplied Front already carries the matte, so don't apply it twice.
 	vec3 fillPremult;
-	if (useFront && frontPremultiplied)
+	if (useFillColor)
+		fillPremult = fillColor * fillA;
+	else if (frontPremultiplied)
 		fillPremult = texture2D(front, uv).rgb;
 	else
-		fillPremult = (useFront ? texture2D(front, uv).rgb : fillColor) * fillA;
+		fillPremult = texture2D(front, uv).rgb * fillA;
 
 	gl_FragColor = vec4(fillPremult, fillA);
 }

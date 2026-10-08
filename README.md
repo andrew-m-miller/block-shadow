@@ -7,7 +7,7 @@ input) is comped over it.
 
 ![BlockShadow output: a fill colour with a hard dark shadow down-right, the Front input as fill with a yellow shadow down-left, and a blue fill with a long soft shadow](docs/preview.png)
 
-*Top: Fill Colour, Angle -45, Length 16. Middle: Use Front as Fill, Angle
+*Top: Fill Colour, Angle -45, Length 16. Middle: Front as the fill, Angle
 -135, Length 30. Bottom: Angle -60, Length 60, Softness 8. Shown comped over
 a background.*
 
@@ -40,7 +40,11 @@ timeline where Matchbox effects are supported.
 
 ## Inputs
 
-- **Front:** RGB. Only used when **Use Front as Fill** is on.
+- **Front:** RGB. Required. The node's output resolution and tagged colour
+  space come from this input. It's also the fill, unless **Use Fill
+  Colour** is on. In that case its pixels aren't used, so you can connect
+  any clip with the resolution and colour space you want, such as the same
+  clip that feeds the Matte.
 - **Matte:** the shape that casts the shadow. Required.
 - **Shadow Fill:** RGB, optional. A gradient, texture or any other image to
   colour the shadow with. Only used when **Use Shadow Fill Input** is on.
@@ -62,19 +66,20 @@ timeline where Matchbox effects are supported.
 
 **Fill**
 
-- **Use Front as Fill:** use the Front input instead of Fill Colour.
+- **Use Fill Colour:** fill with a flat colour instead of the Front input.
+  Off by default.
+- **Fill Colour:** the fill's colour. Only shown when Use Fill Colour is on.
 - **Front Premultiplied:** turn on if the Front is already premultiplied by
-  the matte, so it isn't multiplied again. Only applies with Use Front as
-  Fill.
-- **Fill Colour:** the fill's colour when not using the Front.
+  the matte, so it isn't multiplied again. Only shown when Use Fill Colour
+  is off.
 
 **Shadow Fill**
 
 - **Use Shadow Fill Input:** colour the shadow with the Shadow Fill input
   instead of Shadow Colour. The input is lined up with the frame, not
   extruded with the shadow, so a gradient stays put as the shadow moves.
-- **Shadow Colour:** the shadow's colour when not using the Shadow Fill
-  input.
+- **Shadow Colour:** the shadow's colour. Only shown when Use Shadow Fill
+  Input is off.
 
 ## Outputs
 
