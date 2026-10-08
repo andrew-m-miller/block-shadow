@@ -71,15 +71,15 @@
          <Duplicate>
          </Duplicate>
       </Uniform>
-      <Uniform Row="0" Col="1" Page="1" Default="False" Tooltip="Extrude towards a vanishing point instead of along a fixed angle." Type="bool" DisplayName="Perspective" Name="perspective">
+      <Uniform Row="0" Col="0" Page="2" Default="False" Tooltip="Extrude towards a vanishing point instead of along a fixed angle." Type="bool" DisplayName="Perspective" Name="perspective">
       </Uniform>
-      <Uniform Inc="0.01" Tooltip="Point the shadow recedes towards, in frame coordinates (0-1)." UIConditionSource="perspective" UIConditionValue="True" UIConditionType="Hide" Row="1" Col="1" Page="1" IconType="Axis" Type="vec2" DisplayName="Vanishing Point" Name="vanishingPoint">
+      <Uniform Inc="0.01" Tooltip="Point the shadow recedes towards, in frame coordinates (0-1)." UIConditionSource="perspective" UIConditionValue="True" UIConditionType="Hide" Row="1" Col="0" Page="2" IconType="Axis" Type="vec2" DisplayName="Vanishing Point" Name="vanishingPoint">
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.5">
          </SubUniform>
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.5">
          </SubUniform>
       </Uniform>
-      <Uniform ResDependent="None" Max="0.99" Min="0.0" Default="0.25" Inc="0.01" Tooltip="How far the shadow reaches towards the vanishing point. 0 = none, 0.5 = halfway." UIConditionSource="perspective" UIConditionValue="True" UIConditionType="Hide" Row="2" Col="1" Page="1" Type="float" DisplayName="Depth" Name="perspectiveDepth">
+      <Uniform ResDependent="None" Max="0.99" Min="0.0" Default="0.25" Inc="0.01" Tooltip="How far the shadow reaches towards the vanishing point. 0 = none, 0.5 = halfway." UIConditionSource="perspective" UIConditionValue="True" UIConditionType="Hide" Row="3" Col="0" Page="2" Type="float" DisplayName="Depth" Name="perspectiveDepth">
       </Uniform>
    </Shader>
 
@@ -193,10 +193,12 @@
       <Col Name="Output" Col="3" Page="0">
       </Col>
    </Page>
-   <Page Name="Outline / Perspective" Page="1">
+   <Page Name="Outline" Page="1">
       <Col Name="Outline" Col="0" Page="1">
       </Col>
-      <Col Name="Perspective" Col="1" Page="1">
+   </Page>
+   <Page Name="Perspective" Page="2">
+      <Col Name="Perspective" Col="0" Page="2">
       </Col>
    </Page>
 </ShaderNodePreset>

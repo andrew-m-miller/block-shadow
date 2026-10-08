@@ -59,7 +59,7 @@ timeline where Matchbox effects are supported.
 
 ## Controls
 
-The controls are on two pages.
+The controls are on three pages.
 
 ### Block Shadow page
 
@@ -107,9 +107,7 @@ The controls are on two pages.
   fill sits (beyond any Gap), so comping the fill back over it gives the
   same result as the normal output.
 
-### Outline / Perspective page
-
-**Outline**
+### Outline page
 
 - **Outline:** which outline to draw.
   - **Off:** no outline.
@@ -119,7 +117,7 @@ The controls are on two pages.
 - **Outline Width:** in pixels. Hidden when Outline is Off.
 - **Outline Colour:** hidden when Outline is Off.
 
-**Perspective**
+### Perspective page
 
 - **Perspective:** extrude towards a vanishing point instead of along a
   fixed angle. Angle and Length are hidden while it's on.

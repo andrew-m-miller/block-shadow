@@ -3,7 +3,8 @@
 // BlockShadow pass 5: distance to the silhouette (fill + shadow), horizontal
 // half. Only used by the Silhouette outline.
 //
-// Output R : horizontal distance to the silhouette
+// Output R : horizontal distance to the nearest silhouette pixel on this row
+// Output G : that pixel's edge offset, 0.5 - coverage (see pass 6)
 
 uniform sampler2D adsk_results_pass1;  // a = fill matte
 uniform sampler2D adsk_results_pass4;  // r = hard shadow matte
@@ -29,7 +30,9 @@ void main(void)
 
 	int radius = int(ceil((outlineWidth + 1.0) / ratio));
 
-	float h = FAR;
+	float best = FAR;
+	float bestDx = FAR;
+	float bestEdge = 0.0;
 	for (int j = 0; j < 2 * MAX_RADIUS + 1; j++) {
 		int i = j - radius;
 		if (i > radius)
@@ -38,12 +41,20 @@ void main(void)
 		if (uv.x < 0.0 || uv.x > 1.0)
 			continue;
 
-		// Distance to the edge of a partly covered pixel is offset by its
-		// coverage, which keeps the outline anti-aliased.
+		// A pixel's edge sits (0.5 - coverage) pixels from its centre, so
+		// partly covered pixels place the edge between pixels. This keeps the
+		// distance smooth along the edge, which anti-aliases the outline.
 		float a = max(texture2D(adsk_results_pass1, uv).a, texture2D(adsk_results_pass4, uv).r);
-		if (a > 0.0)
-			h = min(h, max(abs(float(i)) * ratio + 0.5 - a, 0.0));
+		if (a > 0.0) {
+			float dx = abs(float(i)) * ratio;
+			float edge = 0.5 - a;
+			if (dx + edge < best) {
+				best = dx + edge;
+				bestDx = dx;
+				bestEdge = edge;
+			}
+		}
 	}
 
-	gl_FragColor = vec4(h, 0.0, 0.0, 1.0);
+	gl_FragColor = vec4(bestDx, bestEdge, 0.0, 1.0);
 }
