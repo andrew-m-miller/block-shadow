@@ -28,15 +28,17 @@ Shown comped over a background.*
 | `AM_BlockShadow.7.glsl` | Pass 7: blurs the shadow horizontally |
 | `AM_BlockShadow.8.glsl` | Pass 8: blurs the shadow vertically and comps everything |
 | `AM_BlockShadow.xml` | UI definition: inputs, controls, layout |
+| `AM_BlockShadow.1.glsl.p` | Thumbnail shown in Flame's shader browser |
 
-Keep all nine files together and keep the names as they are. Flame runs the
+Keep all ten files together and keep the names as they are. Flame runs the
 numbered passes in order and reads the `.xml` to build the node's UI.
 
 ## Install
 
-1. Copy all eight `AM_BlockShadow.*.glsl` files and `AM_BlockShadow.xml`
-   into the same folder on your Flame workstation. A shared location such
-   as `/opt/Autodesk/shared/matchbox/shaders/` makes it available to every
+1. Copy all eight `AM_BlockShadow.*.glsl` files, `AM_BlockShadow.xml` and
+   the `AM_BlockShadow.1.glsl.p` thumbnail into the same folder on your
+   Flame workstation. A shared location such as
+   `/opt/Autodesk/shared/matchbox/shaders/` makes it available to every
    project, but any folder Flame can browse to works.
 2. In Batch, add a **Matchbox** node. In the file browser that opens, go to
    that folder and pick `AM_BlockShadow.1.glsl`.
