@@ -17,23 +17,23 @@ a background.*
 
 | File | Purpose |
 | --- | --- |
-| `BlockShadow.1.glsl` | Pass 1: builds the fill and carries the matte |
-| `BlockShadow.2.glsl` | Pass 2: extrudes the matte into the block shadow |
-| `BlockShadow.3.glsl` | Pass 3: blurs the shadow horizontally |
-| `BlockShadow.4.glsl` | Pass 4: blurs the shadow vertically and comps the fill over it |
-| `BlockShadow.xml` | UI definition: inputs, controls, layout |
+| `AM_BlockShadow.1.glsl` | Pass 1: builds the fill and carries the matte |
+| `AM_BlockShadow.2.glsl` | Pass 2: extrudes the matte into the block shadow |
+| `AM_BlockShadow.3.glsl` | Pass 3: blurs the shadow horizontally |
+| `AM_BlockShadow.4.glsl` | Pass 4: blurs the shadow vertically and comps the fill over it |
+| `AM_BlockShadow.xml` | UI definition: inputs, controls, layout |
 
 Keep all five files together and keep the names as they are. Flame runs the
 numbered passes in order and reads the `.xml` to build the node's UI.
 
 ## Install
 
-1. Copy all four `BlockShadow.*.glsl` files and `BlockShadow.xml` into the
+1. Copy all four `AM_BlockShadow.*.glsl` files and `AM_BlockShadow.xml` into the
    same folder on your Flame workstation. A shared location such as
    `/opt/Autodesk/shared/matchbox/shaders/` makes it available to every
    project, but any folder Flame can browse to works.
 2. In Batch, add a **Matchbox** node. In the file browser that opens, go to
-   that folder and pick `BlockShadow.1.glsl`.
+   that folder and pick `AM_BlockShadow.1.glsl`.
 3. Connect your Front (RGB) and Matte (A), and optionally a Shadow Fill,
    then use the node's Result and Matte outputs.
 
