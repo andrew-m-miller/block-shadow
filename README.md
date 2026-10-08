@@ -5,10 +5,12 @@ shadow from a matte. The matte is extruded along an angle, optionally
 softened with a gaussian blur, then the fill (a flat colour or the Front
 input) is comped over it.
 
-![BlockShadow output: a fill colour with a hard dark shadow down-right, the Front input as fill with a yellow shadow down-left, and a blue fill with a long soft shadow](docs/preview.png)
+![BlockShadow output in five rows: a hard dark shadow, the Front as the fill with a yellow shadow, a long soft shadow, a striped gradient shadow from the Shadow Fill input, and a half-transparent shadow over red](docs/preview.png)
 
-*Top: Fill Colour, Angle -45, Length 16. Middle: Front as the fill, Angle
--135, Length 30. Bottom: Angle -60, Length 60, Softness 8. Shown comped over
+*From top: Fill Colour with a hard shadow (Angle -45, Length 16). The Front
+as the fill (Angle -135, Length 30). A soft shadow (Angle -60, Length 60,
+Softness 8). A striped gradient from the Shadow Fill input (Angle -50,
+Length 40). Shadow Opacity 0.5 (Angle -45, Length 24). Shown comped over
 a background.*
 
 ## Files
